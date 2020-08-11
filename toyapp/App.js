@@ -29,6 +29,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import TennisBall from './src/components/screens/TennisBall';
+import Spinner from './src/components/screens/Spinner';
 
 const myStack = createStackNavigator();
 
@@ -59,6 +60,13 @@ function HomeScreen({ navigation }) {
               title="Tennis Ball Demo"
               color="#841584"
               backgroundColor = '#34eb74'
+              >
+            </Button>
+            <Button 
+              onPress={() => navigation.navigate('SpinnerDemo')}
+              title="Spinner Demo"
+              color="#841584"
+              bdackgroundColor='#34eb74'
               >
             </Button>
           </View>
@@ -252,6 +260,7 @@ export default class App extends React.Component {
           />
           <myStack.Screen name="TicTacToe" component={TicTacScreen} /> 
           <myStack.Screen name="TennisBallDemo" component={TennisBall} />
+          <myStack.Screen name="SpinnerDemo" component={Spinner} />
         </myStack.Navigator>
       </NavigationContainer>
     );
