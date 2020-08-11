@@ -6,6 +6,12 @@ export default class Spinner extends React.Component {
         super(props)
 
         this.spinAnimation = new Animated.Value(0)
+
+        this.spin = this.spinAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', '360deg']
+        })
+    
     }
 
     componentDidMount() {
@@ -14,18 +20,16 @@ export default class Spinner extends React.Component {
             duration: 1400,
             easing: Easing.linear,
             useNativeDriver: true
-        })).start()
-
-        this.spin = this.spinAnimation.interpolate({
-            inputRange: [0, 1],
-            outputRange: ['0deg', '360deg']
-        })
+        })).start()    
     }
 
+    
     render() {
         return (
-            <View style={StyleSheet.container}>
-                <Animated.View style={[styles.spinner, { transform: [{ rotate: this.spin }]} ]} />
+            <View style={styles.container}>
+                <Animated.View style={[styles.spinner, { transform: [{ rotate: this.spin }]} ]}>
+                    <Text>Hello</Text>
+                </Animated.View>
             </View>
         );
     }
@@ -47,5 +51,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 0,
         borderBottomWidth: 4,
         borderLeftWidth: 4,
+        // alignItems: 'center',
+        // justifyContent: 'center'
     }
 });
