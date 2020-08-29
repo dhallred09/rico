@@ -11,7 +11,8 @@ export default class TennisBall extends Component {
 
     moveBall = () => {
         Animated.spring(this.moveAnimation, {
-            toValue: { x:250, y:10 }
+            toValue: { x:250, y:10 },
+            useNativeDriver: false,
         }).start()
     }
     render() {

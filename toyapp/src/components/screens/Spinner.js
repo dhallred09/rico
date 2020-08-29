@@ -43,14 +43,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#ecf0f1',
     },
     spinner: {
-        width: 40,
-        height: 40,
-        borderRadius: 50,
+        width: 60,
+        height: 60,
+        borderRadius: 70,
         borderColor: 'indigo',
-        borderTopWidth: 4,
+        borderTopWidth: 5,
         borderRightWidth: 0,
-        borderBottomWidth: 4,
-        borderLeftWidth: 4,
+        borderBottomWidth: 5,
+        borderLeftWidth: 5,
         // alignItems: 'center',
         // justifyContent: 'center'
     }
