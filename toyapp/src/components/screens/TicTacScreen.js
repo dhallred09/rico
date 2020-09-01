@@ -5,7 +5,7 @@ import { Colors, } from 'react-native/Libraries/NewAppScreen';
 import Modal from 'react-native-modal';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import RadioForm from 'react-native-simple-radio-button';
-import { ticTacAI, rowString, colString, diagString1, diagString2 } from '../../actions/TicTacAI';
+import { ticTacAI, rowString, colString, diagString1, diagString2, nullBoard } from '../../actions/TicTacAI';
 // import { HotKeys } from "react-hotkeys";
 
 export default class TicTacScreen extends React.Component {
@@ -13,13 +13,16 @@ export default class TicTacScreen extends React.Component {
     {
       super(props);
       this.state={
+
+        boardSize: 3, // size of tic-tac-toe board
+
         gameState : [
           ["","",""],
           ["","",""],
           ["","",""],
         ],
         currentPlayer : "x",
-        optionVisible : false,
+        optionVisible : false,  //Option screen
         oAIlevel: 0, // AI level for O (0 == human)
         xAIlevel: 0, // AI level for X (0 == human)
       }
@@ -34,17 +37,18 @@ export default class TicTacScreen extends React.Component {
 
     }
   
-    resetGame = () => {
+    resetGame = (size) => {
       this.setState({
-        gameState : [
-          ["","",""],
-          ["","",""],
-          ["","",""],
-        ],
+        gameState : nullBoard(size),
         currentPlayer : "x",
       });
     }
   
+    changeBoardSize = (size) => {
+      this.setState({boardSize:size});
+      this.resetGame(size);
+      console.log("change board: "+size+" board:"+this.gameState);
+    }
     
     // Turn Options screen (a Modal) on (visible) or off (invisible).
     toggleModal = () => {
@@ -52,6 +56,15 @@ export default class TicTacScreen extends React.Component {
       this.setState({ optionVisible: newV });
     };
 
+    // screen size options
+    sizeOptions = [
+      {label: "3", value: 3},
+      {label: "4", value: 4},
+      {label: "5", value: 5},
+      {label: "6", value: 6},
+    ];
+
+    // player AI options
     oOptions = [
       {label: "Human", value: 0 },
       {label: "AI easy", value: 1},
@@ -60,65 +73,54 @@ export default class TicTacScreen extends React.Component {
     ];
 
     
-    // Detect if X has won by looking for rows, columns, or diagonals
-    // filled with X's. Note, the actual board contents are lowercase.
-    xWinner = () => {
+    // Detect if a given player has won by looking for rows, columns, or diagonals
+    // filled with the payer's mark. Note, the actual board contents are lowercase.
+    winner = (player) => {
       var board = this.state.gameState;
-      if (rowString(0,board) == "xxx" ||
-          rowString(1,board) == "xxx" ||
-          rowString(2,board) == "xxx" ||
-          colString(0,board) == "xxx" ||
-          colString(1,board) == "xxx" ||
-          colString(2,board) == "xxx" ||
-          diagString1(board) == "xxx" ||
-          diagString2(board) == "xxx" ) return true;
-      return false;
-    }
-  
-    // Detect if O has won by looking for rows, columns, or diagonals
-    // filled with O's. Note, the actual board contents are lowercase.
-    oWinner = () => {
-      var board = this.state.gameState;
-      if (rowString(0,board) == "ooo" ||
-          rowString(1,board) == "ooo" ||
-          rowString(2,board) == "ooo" ||
-          colString(0,board) == "ooo" ||
-          colString(1,board) == "ooo" ||
-          colString(2,board) == "ooo" ||
-          diagString1(board) == "ooo" ||
-          diagString2(board) == "ooo" ) return true;
+      var size = this.state.boardSize;
+      var v = player.repeat(board.length);
+      console.log("Win: v:"+v+" rowString(0):"+rowString(0,board));
+      for (let i=0; i<size; i++) {
+        if (rowString(i,board) == v) return true;
+        if (colString(i,board) == v) return true;
+      }
+      if (diagString1(board) == v ||
+          diagString2(board) == v ) return true;
       return false;
     }
   
     // Detect if the game is a draw - all squares filled.
     // It is assumed that winner detection has already been done.
     draw = () => {
-      for (var i=0; i<=2; i++) {
-        for (var j=0; j<=2; j++) {
-          if (this.state.gameState[i][j] == "") return false;
+      var board = this.state.gameState;
+      for (var i=0; i<board.length; i++) {
+        for (var j=0; j<board.length; j++) {
+          if (board[i][j] == "") return false;
         }
       }
       return true;
     }
-  
-    // How to display a board square on the screen
-    renderSquare = (row,col) => {
-      var value = this.state.gameState[row][col];
+
+    // Render the text of a square, x or o
+    squareText = (value) => {
+      var pad="";
       switch (value) {
         // Couldn't get centering to work, so I inject spaces before the X or O. :(
-        case "x": return (<Text style={styles.tileX}>  X</Text>);
-        case "o": return (<Text style={styles.tileO}>  O</Text>);
+        case "x": return (<Text style={styles.tileX}>{pad+"X"}</Text>);
+        case "o": return (<Text style={styles.tileO}>{pad+"O"}</Text>);
         default:  return (<Text style={styles.tileX}></Text>);
       }
     }
   
     // Place a new value in a board square.
     // The value to be placed is the currentPlayer (x or o).
+    // Note: this function is also use by the AI move.
     setSquare = (i,j) => {
+      console.log("setSquare("+JSON.stringify(i,null,2)+","+JSON.stringify(j,null,2)+")");
       // Simply return if we can't actually add another value to the board.
       // For example, a human player can continue to click on squares after
       // the game is won, but it won't do anything.
-      if (this.xWinner() || this.oWinner()) return; // if a winner: can't play
+      if (this.winner('x') || this.winner('o')) return; // if a winner: can't play
       let arr = this.state.gameState;
       if (arr[i][j] != "") return; // can't change a value already set
       arr[i][j] = this.state.currentPlayer; // assign the new play to the board
@@ -126,8 +128,40 @@ export default class TicTacScreen extends React.Component {
       // Now switch players.
       let nextPlayer = (this.state.currentPlayer == "x" ? "o" : "x");
       this.setState({currentPlayer: nextPlayer});
-      
     }
+
+    getSquareWidth = () => {
+      switch( this.state.boardSize ) {
+        case(3): return 100;
+        case(4): return 100;
+        default: return 100 - ((this.state.boardSize - 4)*15);
+      }
+    }
+
+    renderRow = (i,row) => {
+      var size = row.length;
+      var sqsize = this.getSquareWidth();
+      console.log("square width:"+sqsize);
+      return (
+        row.map((e,j) => {
+          return (
+            <TouchableWithoutFeedback  onPress={() => this.setSquare(i,j) } key={"row "+i+" col "+j}>
+              <View style={[styles.TTTtile, { 
+                  borderLeftWidth: (j==0 ? 0: 4), 
+                  borderTopWidth: (i==0 ? 0 : 4), 
+                  borderRightWidth: (j==size-1 ? 0 : 4), 
+                  borderBottomWidth: (i==size-1 ? 0 : 4),
+                  width: sqsize ,
+                  height: sqsize ,
+                } ]}>
+                {this.squareText(e)}
+              </View>
+            </TouchableWithoutFeedback>
+          );
+          
+        })
+      );
+    } 
 
     AImove = () => {
       // Check for AI player
@@ -138,16 +172,7 @@ export default class TicTacScreen extends React.Component {
         let level = (this.state.currentPlayer=='x' ? this.state.xAIlevel : this.state.oAIlevel);
         let play = ticTacAI(this.state.currentPlayer,this.state.gameState,level);
         console.log("AI play: "+JSON.stringify(play,null,2));
-        let i = play[0];
-        let j = play[1];
-        if (this.xWinner() || this.oWinner()) return null; // if a winner: can't play
-        let arr = this.state.gameState;
-        if (arr[i][j] != "") return null; // can't change a value already set
-        arr[i][j] = this.state.currentPlayer; // assign the new play to the board
-        this.setState({gameState : arr});
-        // Now switch players.
-        let nextPlayer = (this.state.currentPlayer == "x" ? "o" : "x");
-        this.setState({currentPlayer: nextPlayer});
+        this.setSquare(play[0],play[1]);
       }
       return null;
     }
@@ -155,8 +180,8 @@ export default class TicTacScreen extends React.Component {
     // Display text on whose turn it is.
     // Displays winner/draw instead when needed.
     turnText = () => {
-      if (this.xWinner()) return (<Text style={styles.TTTtext}>X Wins!</Text>);
-      if (this.oWinner()) return (<Text style={styles.TTTtext}>O Wins!</Text>);
+      if (this.winner('x')) return (<Text style={styles.TTTtext}>X Wins!</Text>);
+      if (this.winner('o')) return (<Text style={styles.TTTtext}>O Wins!</Text>);
       if (this.draw()) return (<Text style={styles.TTTtext}>Draw!</Text>);
       switch(this.state.currentPlayer) {
         case "x": return (<Text style={styles.tileX2}>X <Text style={styles.TTTtext}>Turn </Text></Text>);
@@ -169,63 +194,14 @@ export default class TicTacScreen extends React.Component {
       // <HotKeys keyMap={this.keyMap} handlers={this.handlers} >
         <View style={styles.TTTcontainer}>
           {/* Render the board */}
-          <View style={{flexDirection: "row"}}>
-            {/* render row 0 */}
-            <TouchableWithoutFeedback  onPress={() => this.setSquare(0,0) }>
-              <View style={[styles.TTTtile, { borderLeftWidth: 0, borderTopWidth: 0} ]}>
-                {this.renderSquare(0,0)}
+          { this.state.gameState.map((row,idx) => {
+            return (
+              <View style={{flexDirection: "row"}} key={idx}>
+                {this.renderRow(idx,row)}
               </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback  onPress={() => this.setSquare(0,1) }>
-              <View style={[styles.TTTtile, { borderTopWidth: 0 }]}>
-                {this.renderSquare(0,1)}
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback  onPress={() => this.setSquare(0,2) }>
-              <View style={[styles.TTTtile, { borderTopWidth: 0, borderRightWidth: 0} ]}>
-                {this.renderSquare(0,2)}
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        
-          <View style={{flexDirection: "row"}}>
-            {/* render row 1 */}
-            <TouchableWithoutFeedback  onPress={() => this.setSquare(1,0) }>
-              <View style={[styles.TTTtile, { borderLeftWidth: 0 }]}>
-                {this.renderSquare(1,0)}
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback  onPress={() => this.setSquare(1,1) }>
-              <View style={[styles.TTTtile,]}>
-                {this.renderSquare(1,1)}
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback  onPress={() => this.setSquare(1,2) }>
-              <View style={[styles.TTTtile, { borderRightWidth: 0 }]}>
-                {this.renderSquare(1,2)}
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        
-          <View style={{flexDirection: "row"}}>
-            {/* render row 2 */}
-            <TouchableWithoutFeedback  onPress={() => this.setSquare(2,0) }>
-             <View style={[styles.TTTtile, { borderLeftWidth: 0, borderBottomWidth: 0} ]}>
-                {this.renderSquare(2,0)}
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback  onPress={() => this.setSquare(2,1) }>
-              <View style={[styles.TTTtile, { borderBottomWidth: 0 }]}>
-                {this.renderSquare(2,1)}
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback  onPress={() => this.setSquare(2,2) }>
-              <View style={[styles.TTTtile, { borderRightWidth: 0, borderBottomWidth: 0} ]}>
-                {this.renderSquare(2,2)}
-              </View>
-            </TouchableWithoutFeedback>
-            
-          </View>
+              );
+          }) }
+          
 
           {/* Render whose turn it is, or winner */}
           <View style={{flexDirection: "row"}}>
@@ -235,7 +211,7 @@ export default class TicTacScreen extends React.Component {
           </View>
 
           {/* New Game button */}
-          <TouchableWithoutFeedback  onPress={() => this.resetGame() }>
+          <TouchableWithoutFeedback  onPress={() => this.resetGame(this.state.boardSize) }>
               <View style={[styles.TTTtext]}>
                 <Text style={{color:"green", fontSize:30, marginTop:20}}>New Game</Text>
               </View>
@@ -250,6 +226,18 @@ export default class TicTacScreen extends React.Component {
                 isVisible={this.state.optionVisible}>
             <View style={styles.modal}>
                 <Text style={styles.optionText}>Tic-Tac-Toe Options</Text>
+                <Text style={styles.optionText}>Board Size</Text>
+                <RadioForm
+                    radio_props={this.sizeOptions}
+                    initial={this.state.boardSize - 3}
+                    formHorizontal={true}
+                    labelHorizontal={false}
+                    buttonColor={'#3e4152'}
+                    labelColor={'white'}
+                    selectedLabelColor={'yellow'}
+                    onPress={(value) => this.changeBoardSize(value)}
+                    // onPress={(value) => alert("value: "+value)}
+                />
                 <Text style={styles.optionText}>O Player</Text>
                 <RadioForm
                     radio_props={this.oOptions}
@@ -276,8 +264,6 @@ export default class TicTacScreen extends React.Component {
     
   }
   
-  
-  
 const styles = StyleSheet.create({
     TTTcontainer: {
         flex: 1,
@@ -295,6 +281,8 @@ const styles = StyleSheet.create({
         borderWidth: 4,
         width: 100,
         height: 100,
+        justifyContent: 'center',
+        alignItems: 'center',
       },
       tileX: {
         color: "red",

@@ -1,30 +1,43 @@
 // Get the contents of a particular board row as a string. 
 export function rowString(i,board) {
-    return (board[i][0] + board[i][1] + board[i][2]);
+    let v = "";
+    for (let j=0; j<board.length; j++) {
+        v += board[i][j];
+    }
+    console.log(" rowString: i:"+i+" v:"+v);
+    return v;
 }
 
 // Get the contents of a particular board column as a string.
 export function colString(j,board) {
-    return (board[0][j] + board[1][j] + board[2][j]);
+    let v = "";
+    for (let i=0; i<board.length; i++) {
+        v += board[i][j];
+    }
+    return v;
 }
 
 // Get the contents of the "left" diagonal (top left to bottom right)
 // as a string.
 export function diagString1(board) {
-    return (board[0][0] + board[1][1] + board[2][2]);
+    let v = "";
+    for (let i=0; i<board.length; i++) {v = v + board[i][i];}
+    return v;
 }
 
 // Get the contents of the "right" diagonal (top right to bottom left)
 // as a string.
 export function diagString2(board) {
-    return (board[2][0] + board[1][1] + board[0][2]);
+    let v = "";
+    for (let j=board.length-1, i=0; i<board.length; j--,i++) {v = v + board[i][j];}
+    return v;
 }
 
 // Return an array of all coords open for playing
 function openPlays(board) {
     var plays = [];
-    for(var i=0; i<3; i++) {
-        for (var j=0; j<3; j++) {
+    for(var i=0; i<board.length; i++) {
+        for (var j=0; j<board.length; j++) {
             if (board[i][j]=='') plays.push([i,j]);
         }
     }
@@ -41,7 +54,7 @@ function randomPlay(plays) {
 
 // Find an open play on a row and choose it
 function openPlayRow(i,board) {
-    for (var j=0; j<3; j++) {
+    for (var j=0; j<board.length; j++) {
         if (board[i][j]=='') return [i,j];
     }
     return '';
@@ -49,82 +62,55 @@ function openPlayRow(i,board) {
 
 // Find an open play on a column and choose it
 function openPlayCol(j,board) {
-    for (var i=0; i<3; i++) {
+    for (var i=0; i<board.length; i++) {
         if (board[i][j]=='') return [i,j];
     }
     return '';
 }
 
 // Choose an open play on a given diagonal and choose it
-function openPlayDiag(j,board) {
-    if (j==1) {
-        if (board[0][0]=='') return [0,0];
-        if (board[1][1]=='') return [1,1];
-        if (board[2][2]=='') return [2,2];
+function openPlayDiag(n,board) {
+    if (n==1) {
+        for (let i=0; i<board.length; i++) {if (board[i][i]=='') return [i,i];}
     }
     else {
-        if (board[0][2]=='') return [0,2];
-        if (board[1][1]=='') return [1,1];
-        if (board[2][0]=='') return [2,0];
+        for (let j=board.length-1,i=0; i<board.length; j--,i++) {if (board[i][j]=='') return [i,j];}
     }
     return '';
 }
 
 // Pick a winning move for a player if possible. Else return ''
 function checkWinningMove(player,board) {
-    if (rowString(0,board)==player+player) { return openPlayRow(0,board)}
-    if (rowString(1,board)==player+player) { return openPlayRow(1,board)}
-    if (rowString(2,board)==player+player) { return openPlayRow(2,board)}
-    if (colString(0,board)==player+player) { return openPlayCol(0,board)}
-    if (colString(1,board)==player+player) { return openPlayCol(1,board)}
-    if (colString(2,board)==player+player) { return openPlayCol(2,board)}
-    if (diagString1(board)==player+player) { return openPlayDiag(1,board)}
-    if (diagString2(board)==player+player) { return openPlayDiag(2,board)}
+    let pat = player.repeat(board.length-1);
+    for (let i=0; i<board.length; i++) {
+        if (rowString(i,board) == pat) { return openPlayRow(i,board);}
+        if (colString(i,board) == pat) { return openPlayCol(i,board);}
+    }
+    if (diagString1(board)==pat) { return openPlayDiag(1,board)}
+    if (diagString2(board)==pat) { return openPlayDiag(2,board)}
     return '';
 }
 
-// Pick a play to block a player from winning. Else return ''
-function checkBlockingMove(oplayer,board) {
-    if (rowString(0,board)==oplayer+oplayer) { return openPlayRow(0,board)}
-    if (rowString(1,board)==oplayer+oplayer) { return openPlayRow(1,board)}
-    if (rowString(2,board)==oplayer+oplayer) { return openPlayRow(2,board)}
-    if (colString(0,board)==oplayer+oplayer) { return openPlayCol(0,board)}
-    if (colString(1,board)==oplayer+oplayer) { return openPlayCol(1,board)}
-    if (colString(2,board)==oplayer+oplayer) { return openPlayCol(2,board)}
-    if (diagString1(board)==oplayer+oplayer) { return openPlayDiag(1,board)}
-    if (diagString2(board)==oplayer+oplayer) { return openPlayDiag(2,board)}
-    return '';
-}
-
-//return the number of blank plays on the board
+//return the number of non-blank plays on the board
 function boardPlays(board) {
     var n = 0;
-    for (var i=0; i<3; i++) {
-        for (var j=0; j<3; j++) {
+    for (var i=0; i<board.length; i++) {
+        for (var j=0; j<board.length; j++) {
             if (board[i][j]!='') n++;
         }
     }
     return n;
 }
 
-// // Compute what turn we are on.
-// function turnCount(board) {
-//     n = boardPlays(board);
-//     return Math.floor(n/2)+1;
-// }
-
-// const corners = [[0,0],[0,2],[2,0],[2,2]]; // list of corner positions
-// const sides = [[0,1],[1,0],[1,2],[2,1]]; // list of side positions
-// const centers = [[1,1]];
-
-function nullBoard() {
-    return [ [,,],[,,],[,,]];
+export function nullBoard(size) {
+    console.log("nullBoard("+size+")");
+    return Array(size).fill().map(()=>Array(size).fill(''));
 }
 
 // Compare two boards for equality
 function boardEquals(board1,board2) {
-    for(var i=0; i<3; i++) {
-        for (var j=0; j<3; j++) {
+    for(var i=0; i<board.length; i++) {
+        for (var j=0; j<board.length; j++) {
             if (board1[i][j] != board2[i][j]) return false;
         }
     }
@@ -133,7 +119,7 @@ function boardEquals(board1,board2) {
 
 // Return a rotated board, rotated to the right 90 degrees
 function rotateBoard(board) {
-    var newbd = nullBoard();
+    var newbd = nullBoard(board.length);
     for(var i=0; i<3; i++) {
         for (var j1=0, j2=2; j1<3; j1++,j2--) {
             newbd[i][j1] = board[j2][i];
@@ -144,7 +130,7 @@ function rotateBoard(board) {
 
 // Return a "flipped" board along the "left" diagonal
 function flipBoard(board) {
-    var newbd = nullBoard();
+    var newbd = nullBoard(board.length);
     for (var i=0; i<3; i++) {
         for (var j=0; j<3; j++) {
             newbd[j][i] = board[i][j];
@@ -154,20 +140,21 @@ function flipBoard(board) {
 }
 
 // Test pattern against current board.
-// A pattern is a board, that can be rotated to match.
+// board: the current board position
+// pattern: a board, that can be rotated to match the current board.
 // Returns 0 if no match. Otherwise it returns 1-4 for pattern match
 // in the 0th-3rd rotation, or 5-8 if flipped pattern matches in rotations.
 function boardPatternMatch(board,pattern) {
     // if pattern has different number of board plays, no match
     if (boardPlays(board) != boardPlays(pattern)) return 0;
-    if (boardEquals(board,pattern)) return 1;
+    if (boardEquals(board,pattern)) return 1; // board matches pattern w/o rotation/flipping
     // Rotate pattern 3 times and see if there's a match
     var p = pattern;
     for (var k=0; k<3; k++) {
         p = rotateBoard(p);
-        if (boardEquals(board,p)) return k+2;
+        if (boardEquals(board,p)) return k+2; // return value indicates how many rotations
     }
-    // now flip pattern and try again
+    // No match yet; now flip pattern and try again
     p = flipBoard(pattern);
     if (boardEquals(board,p)) return 5;
     // Rotate pattern 3 times and see if there's a match
@@ -178,14 +165,14 @@ function boardPatternMatch(board,pattern) {
     return 0; // no match
 }
 
-// Given a board transformation index, n, so manipulate the pattern
+// Given a board transformation index, n, manipulate the pattern accordingly
 function alignPattern(n,pattern) {
     console.log("align pattern: n="+n+" pattern: "+pattern);
     var n = n-1; // make 0-based n
     var p = pattern;
-    if (n>3) {
+    if (n>3) { // pattern needs to be flipped
         p = flipBoard(p);
-        n = n-4;
+        n = n-4; // remove the 'offset' indicating flipping
     }
     // rotate board n times
     console.log("rotate pattern "+n+" times. pattern: "+p);
@@ -207,6 +194,9 @@ function patternPlays(pattern) {
 }
 
 // Given a play pattern, rotate/flip as necessary, then select plays
+// n: the board transform index - how to rotate/flip the pattern to
+//    match the current board
+// pattern: positions in the board for good moves
 function playPattern(n,pattern) {
     var p = alignPattern(n,pattern);
     console.log("aligned pattern n="+n+" new pattern: "+p);
@@ -223,66 +213,10 @@ function playPattern(n,pattern) {
 //     return board[i][j] == player;
 // }
 
-// // Return a list of corners adjacent to a position (which should be a side)
-// function adjacentCorners(i,j) {
-//     if      (i==1) { return [[0,j],[2,j]]; }
-//     else if (j==1) { return [[i,0],[i,2]]; }
-//     else           { return [] };
-// }
-
-// // Return a position opposite to given position
-// function opposite(i,j) {
-//     // 0 => 2, 2 => 0
-//     m = (i==0?2:(i==2?0:i));
-//     n = (j==0?2:(j==2?0:j));
-//     return [m,n];
-// }
-
-// // Given coordinates of a side position, return a list of adjacent corner
-// // positions. The corners must be empty.
-// function adjacentCornersToSide(board,i,j) {
-//     // alert(JSON.stringify('adjacents: '+adjacentCorners(i,j)));
-//     // alert(JSON.stringify("again: "+adjacentCorners(i,j).filter(e=>openbd(board,e)).map(e=>"["+e[0]+"]["+e[1]+"]")));
-//     return adjacentCorners(i,j).filter(e=>openbd(board,e));
-// }
-
-// // Given a side position, choose an opposite side if empty.
-// function oppositeSide(board,i,j) {
-//     list = [];
-//     list.push(opposite(i,j)); // make a list of positions. 
-//     console.log(" opposite side list: "+JSON.stringify(list,null,2));
-//     v = list.filter(e=>openbd(board,e));
-//     console.log("opposite side filtered: "+JSON.stringify(v,null,2));
-//     return v[0];
-// }
-
-// // Return plays in opposing sides to player on any side.
-// function opposingSide(player,board) {
-//     pp = sides.filter(e=>playerAt(player,board,e[0],e[1])).map(x=>oppositeSide(board,x[0],x[1]));
-//     console.log("opposing side: "+JSON.stringify(pp,null,2));
-//     return pp;
-// }
-
-// // Return plays in open corners adjacent to player on any side.
-// function playsInAdjacentCornersToSide(player,board) {
-//     pp = sides.filter(e=>playerAt(player,board,e[0],e[1])).map(elem => adjacentCornersToSide(board,elem[0],elem[1])).flat();
-//     console.log("plays in corners: " + JSON.stringify(pp,null,2));
-//     return pp;
-// }
-
-// // True if player is found in any corner
-// function playerIsInTheCorner(player,board) {
-//     return corners.some(c=>playerAt(player,board,c[0],c[1]));
-// }
-
-// // True if player is found on any side
-// function playerIsOnTheSide(player,board) {
-//     return sides.some(s=>playerAt(player,board,s[0],s[1]));
-// }
-
 // These board patterns come in pairs; one matches the current board state 
-// (after rotating or flipping), and the 2nd indicates safe moves 
-// (non-empty strings).
+// (after rotating or flipping), and the 2nd indicates safe moves (plays) 
+// (non-empty strings: by convention, I use an 'o' to indicate the better
+// plays).
 const xInCenter = [['','',''],['','x',''],['','','']];
 const xCentPlay = [['o','','o'],['','',''],['o','','o']];  // only corners safe
 const xInCorner = [['x','',''],['','',''],['','','']];
@@ -297,8 +231,6 @@ const _xo___x__   = [['','','x'],['x','',''],['o','','']];
 const _xo___x__Play=[['','',''],['','o','o'],['','','o']];
 const _xox___ox   = [['','x',''],['x','','o'],['o','','x']];
 const _xox___oxPlay=[['o','',''],['','o',''],['','','']];
-// const _xo_x_xo_   = [['','','x'],['x','x','o'],['o','','']]; // doesn't matter where o plays
-// const _xo_x_xo_Play=[['o','o',''],['','',''],['','o','']];
 const xxoo_x___   = [['x','o',''],['x','',''],['o','x','']];
 const xxoo_x___Play=[['','',''],['','o','o'],['','','o']];
 const _xo__x___   = [['','',''],['x','',''],['o','x','']];
@@ -336,14 +268,14 @@ const x___o___xPlay=[['','o',''],['o','','o'],['','o','']];
 
 const oPatterns = [
     xInCenter, xInCorner, _x_Side,
-    xxo______, _xox_____, _xo___x__, _xox___ox, /*_xo_x_xo_,*/ _xo__x___, xxoo_x___, _xo__xxo_, _xo___xox,
+    xxo______, _xox_____, _xo___x__, _xox___ox, _xo__x___, xxoo_x___, _xo__xxo_, _xo___xox,
     _xo_____x, _xo__x_ox, xxo__x_o_, ox_x__xo_, _x_x___o_, ox_x___ox, _x_x__oox, 
     _x_xo____, _x__o_x__, _x_ooxx__, o___x___x, x__oox_x_, x___o___x, 
 ];
 
 const oPatternPlays = [
     xCentPlay , xCornPlay , _x_SidePlay,
-    xxo______Play, _xox_____Play, _xo___x__Play, _xox___oxPlay, /*_xo_x_xo_Play,*/ _xo__x___Play, xxoo_x___Play, _xo__xxo_Play, _xo___xoxPlay,
+    xxo______Play, _xox_____Play, _xo___x__Play, _xox___oxPlay, _xo__x___Play, xxoo_x___Play, _xo__xxo_Play, _xo___xoxPlay,
     _xo_____xPlay, _xo__x_oxPlay, xxo__x_o_Play, ox_x__xo_Play, _x_x___o_Play, ox_x___oxPlay, _x_x__ooxPlay, 
     _x_xo____Play, _x__o_x__Play, _x_ooxx__Play, o___x___xPlay, x__oox_x_Play, x___o___xPlay, 
 ];
@@ -356,18 +288,6 @@ function oPlayerAI(board) {
         if (n=boardPatternMatch(board,oPatterns[v])) return randomPlay(playPattern(n,oPatternPlays[v]));
     }
     console.log("choose random...");
-    // // 1st play positions
-    // if (boardEquals(board,xInCenter)) return randomPlay(corners);
-    // if (boardPatternMatch(board,xInCorner)) return centers[0];
-    // if (boardPatternMatch(board,_x_Side)) return randomPlay( [
-    //         playsInAdjacentCornersToSide('x',board),
-    //         centers,
-    //         opposingSide('x',board)
-    //     ].flat() );
-    // // 2nd or higher positions
-    // // x on the side:
-    
-    // if (n=boardPatternMatch(board,xxoSide)) return randomPlay(playPattern(n,xxoSidePlay));
     return ''; // means choose random free spot
 }
 
@@ -387,13 +307,14 @@ export function ticTacAI(player, board, level) {
     if (level>1) {
         let play = checkWinningMove(player,board);
         if (play != '') return play;
-        play = checkBlockingMove(oplayer,board);
+        play = checkWinningMove(oplayer,board);
         if (play != '') return play;
     }
     if (level>2) {
         let play = advancedAI(player,board,level);
         if (play != '') return play;
     }
-    const plays = openPlays(board);
-    return randomPlay(plays);
+    // If none of the harder AI's came up with a better move,
+    // pick a random one from all moves available.
+    return randomPlay(openPlays(board));
 }
