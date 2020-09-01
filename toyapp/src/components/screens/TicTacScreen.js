@@ -238,16 +238,33 @@ export default class TicTacScreen extends React.Component {
                     onPress={(value) => this.changeBoardSize(value)}
                     // onPress={(value) => alert("value: "+value)}
                 />
-                <Text style={styles.optionText}>O Player</Text>
-                <RadioForm
-                    radio_props={this.oOptions}
-                    initial={this.state.oAIlevel}
-                    buttonColor={'#3e4152'}
-                    labelColor={'white'}
-                    selectedLabelColor={'yellow'}
-                    onPress={(value) => this.setState({oAIlevel:value})}
-                />
-                <Button title="Close Options" onPress={() => this.toggleModal()} />
+                <View style={{flexDirection: "row", marginTop: 5}} >
+                  <View>
+                    <Text style={styles.optionText}>X Player</Text>
+                    <RadioForm
+                        radio_props={this.oOptions}
+                        initial={this.state.xAIlevel}
+                        buttonColor={'#3e4152'}
+                        labelColor={'white'}
+                        selectedLabelColor={'yellow'}
+                        onPress={(value) => this.setState({xAIlevel:value})}
+                    />
+                  </View>
+                  <View><Text>      </Text></View>
+                  <View>
+                    <Text style={styles.optionText}>O Player</Text>
+                    <RadioForm
+                        radio_props={this.oOptions}
+                        initial={this.state.oAIlevel}
+                        buttonColor={'#3e4152'}
+                        labelColor={'white'}
+                        selectedLabelColor={'yellow'}
+                        onPress={(value) => this.setState({oAIlevel:value})}
+                    />
+                  </View>
+                </View>
+                <Text style={{fontSize: 50}}>   </Text>
+                <Button title="Close Options" stype={{marginTop: 20, fontSize: 50} }onPress={() => this.toggleModal()} />
             </View>
           </Modal>
 

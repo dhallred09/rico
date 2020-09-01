@@ -1,19 +1,14 @@
 // Get the contents of a particular board row as a string. 
 export function rowString(i,board) {
     let v = "";
-    for (let j=0; j<board.length; j++) {
-        v += board[i][j];
-    }
-    console.log(" rowString: i:"+i+" v:"+v);
+    for (let j=0; j<board.length; j++) v += board[i][j];
     return v;
 }
 
 // Get the contents of a particular board column as a string.
 export function colString(j,board) {
     let v = "";
-    for (let i=0; i<board.length; i++) {
-        v += board[i][j];
-    }
+    for (let i=0; i<board.length; i++) v += board[i][j];
     return v;
 }
 
@@ -21,7 +16,7 @@ export function colString(j,board) {
 // as a string.
 export function diagString1(board) {
     let v = "";
-    for (let i=0; i<board.length; i++) {v = v + board[i][i];}
+    for (let i=0; i<board.length; i++) v = v + board[i][i];
     return v;
 }
 
@@ -29,7 +24,7 @@ export function diagString1(board) {
 // as a string.
 export function diagString2(board) {
     let v = "";
-    for (let j=board.length-1, i=0; i<board.length; j--,i++) {v = v + board[i][j];}
+    for (let j=board.length-1, i=0; i<board.length; j--,i++) v = v + board[i][j];
     return v;
 }
 
