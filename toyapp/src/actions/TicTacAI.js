@@ -29,11 +29,12 @@ export function diagString2(board) {
 }
 
 // Return an array of all coords open for playing
-function openPlays(board) {
+function openPlays(board,v='') {
+    // console.log("openPlays( "+board+" , "+v);
     var plays = [];
     for(var i=0; i<board.length; i++) {
         for (var j=0; j<board.length; j++) {
-            if (board[i][j]=='') plays.push([i,j]);
+            if (board[i][j]==v) plays.push([i,j]);
         }
     }
     return plays;
@@ -41,7 +42,8 @@ function openPlays(board) {
 
 //Given a list of possible plays, pick one at random
 function randomPlay(plays) {
-    console.log("pick random play from: "+plays);
+    // console.log("pick random play from: "+JSON.stringify(plays,null,2));
+    // console.log("pick random play from: "+plays);
     var limit = plays.length;
     var rand = Math.floor(Math.random()*(limit-1))
     return plays[rand];
@@ -97,9 +99,95 @@ function boardPlays(board) {
     return n;
 }
 
+// return an empty board
 export function nullBoard(size) {
     console.log("nullBoard("+size+")");
     return Array(size).fill().map(()=>Array(size).fill(''));
+}
+
+// Copy a 2-dimensional array
+export function arrayCopy(ary) {
+    return ary.map(a => a.slice());
+}
+
+function playWins(play,board) {
+    var w = board[play[0]][play[1]].repeat(board.length);
+    // console.log("playWins("+play+","+board+")"+" w:"+w);
+    if (rowString(play[0],board) == w) return true;
+    if (colString(play[1],board) == w) return true;
+    if (diagString1(board) == w) return true;
+    if (diagString2(board) == w) return true;
+    return false;
+}
+
+function boardScore(player,board) {
+    var scoreBoard = arrayCopy(board); // keep a score for open positions
+    var oplayer = (player=='x' ? 'o' : 'x'); // opponent
+    var plays = openPlays(board);
+    if (plays.length == 0) return 0;  // board full
+    var size = board.length;
+    var n = plays.length;
+    // console.log(n+" boardScore("+player+","+board+") plays:"+plays);
+    // If we're given a blank board (1st turn) then just play randomly.
+    // if (plays.length == size*size) return randomPlay(plays);
+    // Try each open play
+    plays.forEach(play => {
+        // In a new board, place a mark in the open play
+        let newbd = arrayCopy(board);
+        newbd[play[0]][play[1]] = player;
+        // console.log(n+" "+player+" play: "+play+" newbd:"+newbd+" win?"+playWins(play,newbd));
+        let score = -1;
+        if (playWins(play,newbd)) score = 1;
+        else {
+            score = - boardScore(oplayer,newbd); // compute a score
+            // console.log(n+" "+player+" score: "+score+" for play "+play+" on board "+newbd);
+            // score = 0 - score;
+        }
+        scoreBoard[play[0]][play[1]] = score; // save the score
+    })
+    // console.log(n+" scoreBoard: "+scoreBoard);
+    if (scoreBoard.some(v => {return v.some(w=>w==1)})) return 1;
+    if (scoreBoard.some(v => {return v.some(w=>w==0)})) return 0;
+    if (scoreBoard.some(v => {return v.some(w=>w==-1)})) return -1;
+    return 0;
+}
+
+function getMoveByScore(player,board) {
+    var scoreBoard = arrayCopy(board); // keep a score for open positions
+    var oplayer = (player=='x' ? 'o' : 'x');
+    var plays = openPlays(board);
+    // console.log('getMoveByScore('+player+", "+board+") level: "+plays.length);
+    // console.log('  open plays: '+plays);
+    if (plays==[]) return '';
+    var size = board.length;
+    // If we're given a blank board (1st turn) then just play randomly.
+    if (plays.length == size*size) return randomPlay(plays);
+    // Try each open play
+    plays.forEach(play => {
+        // console.log("Top try play "+play);
+        // In a new board, place a mark in the open play
+        let newbd = arrayCopy(board);
+        newbd[play[0]][play[1]] = player;
+        // console.log("new board: "+newbd+" play wins?"+playWins(play,newbd));
+        let score = -1;
+        // console.log(plays.length+" "+player+" play: "+play+" newbd:"+newbd+" win?"+playWins(play,newbd));
+        if (playWins(play,newbd)) score = 1;
+        else {
+            score = 0 - boardScore(oplayer,newbd); // compute a score for new board
+            // console.log(plays.length+" "+player+" score: "+score+" for play "+play+" on board "+newbd);
+        }
+        scoreBoard[play[0]][play[1]] = score; // save the score
+    })
+    // console.log('Top scoreboard: '+JSON.stringify(scoreBoard,null,2));
+    plays = openPlays(scoreBoard,1);
+    // console.log("1 plays: "+plays+"  size:"+plays.length);
+    if (plays.length > 0) return randomPlay(plays); 
+    plays = openPlays(scoreBoard,0);
+    // console.log("0 plays: "+plays);
+    if (plays.length > 0) return randomPlay(plays);
+    plays = openPlays(scoreBoard,-1);
+    if (plays.length > 0) return randomPlay(plays);
+    return '';
 }
 
 // Compare two boards for equality
@@ -144,7 +232,7 @@ function boardPatternMatch(board,pattern) {
     if (boardPlays(board) != boardPlays(pattern)) return 0;
     if (boardEquals(board,pattern)) return 1; // board matches pattern w/o rotation/flipping
     // Rotate pattern 3 times and see if there's a match
-    var p = pattern;
+    var p = arrayCopy(pattern);
     for (var k=0; k<3; k++) {
         p = rotateBoard(p);
         if (boardEquals(board,p)) return k+2; // return value indicates how many rotations
@@ -164,7 +252,7 @@ function boardPatternMatch(board,pattern) {
 function alignPattern(n,pattern) {
     console.log("align pattern: n="+n+" pattern: "+pattern);
     var n = n-1; // make 0-based n
-    var p = pattern;
+    var p = arrayCopy(pattern);
     if (n>3) { // pattern needs to be flipped
         p = flipBoard(p);
         n = n-4; // remove the 'offset' indicating flipping
@@ -197,16 +285,6 @@ function playPattern(n,pattern) {
     console.log("aligned pattern n="+n+" new pattern: "+p);
     return patternPlays(p);
 }
-
-// // True if the given board element at e is empty.
-// function openbd(board,e) {
-//     return board[e[0]][e[1]] == '';
-// }
-
-// // True if player is found at board coordinates.
-// function playerAt(player,board,i,j) {
-//     return board[i][j] == player;
-// }
 
 // These board patterns come in pairs; one matches the current board state 
 // (after rotating or flipping), and the 2nd indicates safe moves (plays) 
@@ -286,8 +364,9 @@ function oPlayerAI(board) {
     return ''; // means choose random free spot
 }
 
-function advancedAI(player,board,level) {
-    if (player=='o') return oPlayerAI(board);
+function advancedAI(player,board) {
+    if (player=='o' && board.length == 3) return oPlayerAI(board);
+    return getMoveByScore(player,board);
     return ''; // this causes a random play to be selected
 }
 
@@ -306,7 +385,7 @@ export function ticTacAI(player, board, level) {
         if (play != '') return play;
     }
     if (level>2) {
-        let play = advancedAI(player,board,level);
+        let play = advancedAI(player,board);
         if (play != '') return play;
     }
     // If none of the harder AI's came up with a better move,

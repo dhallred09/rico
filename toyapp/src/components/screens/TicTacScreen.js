@@ -5,7 +5,8 @@ import { Colors, } from 'react-native/Libraries/NewAppScreen';
 import Modal from 'react-native-modal';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import RadioForm from 'react-native-simple-radio-button';
-import { ticTacAI, rowString, colString, diagString1, diagString2, nullBoard } from '../../actions/TicTacAI';
+import { ticTacAI, rowString, colString, diagString1, diagString2, 
+         nullBoard, arrayCopy } from '../../actions/TicTacAI';
 // import { HotKeys } from "react-hotkeys";
 
 export default class TicTacScreen extends React.Component {
@@ -76,10 +77,10 @@ export default class TicTacScreen extends React.Component {
     // Detect if a given player has won by looking for rows, columns, or diagonals
     // filled with the payer's mark. Note, the actual board contents are lowercase.
     winner = (player) => {
-      var board = this.state.gameState;
+      var board = this.state.gameState; // Note: shallow reference
       var size = this.state.boardSize;
       var v = player.repeat(board.length);
-      console.log("Win: v:"+v+" rowString(0):"+rowString(0,board));
+      // console.log("Win: v:"+v+" rowString(0):"+rowString(0,board));
       for (let i=0; i<size; i++) {
         if (rowString(i,board) == v) return true;
         if (colString(i,board) == v) return true;
@@ -92,7 +93,7 @@ export default class TicTacScreen extends React.Component {
     // Detect if the game is a draw - all squares filled.
     // It is assumed that winner detection has already been done.
     draw = () => {
-      var board = this.state.gameState;
+      var board = this.state.gameState; // Note: shallow reference
       for (var i=0; i<board.length; i++) {
         for (var j=0; j<board.length; j++) {
           if (board[i][j] == "") return false;
@@ -116,12 +117,12 @@ export default class TicTacScreen extends React.Component {
     // The value to be placed is the currentPlayer (x or o).
     // Note: this function is also use by the AI move.
     setSquare = (i,j) => {
-      console.log("setSquare("+JSON.stringify(i,null,2)+","+JSON.stringify(j,null,2)+")");
+      // console.log("setSquare("+JSON.stringify(i,null,2)+","+JSON.stringify(j,null,2)+")");
       // Simply return if we can't actually add another value to the board.
       // For example, a human player can continue to click on squares after
       // the game is won, but it won't do anything.
       if (this.winner('x') || this.winner('o')) return; // if a winner: can't play
-      let arr = this.state.gameState;
+      let arr = arrayCopy(this.state.gameState);
       if (arr[i][j] != "") return; // can't change a value already set
       arr[i][j] = this.state.currentPlayer; // assign the new play to the board
       this.setState({gameState : arr});
@@ -141,7 +142,7 @@ export default class TicTacScreen extends React.Component {
     renderRow = (i,row) => {
       var size = row.length;
       var sqsize = this.getSquareWidth();
-      console.log("square width:"+sqsize);
+      // console.log("square width:"+sqsize);
       return (
         row.map((e,j) => {
           return (
@@ -171,7 +172,7 @@ export default class TicTacScreen extends React.Component {
         // alert("AI player..." + this.state.oAIlevel + " " + this.state.currentPlayer);
         let level = (this.state.currentPlayer=='x' ? this.state.xAIlevel : this.state.oAIlevel);
         let play = ticTacAI(this.state.currentPlayer,this.state.gameState,level);
-        console.log("AI play: "+JSON.stringify(play,null,2));
+        // console.log("AI play: "+JSON.stringify(play,null,2));
         this.setSquare(play[0],play[1]);
       }
       return null;
@@ -264,7 +265,7 @@ export default class TicTacScreen extends React.Component {
                   </View>
                 </View>
                 <Text style={{fontSize: 50}}>   </Text>
-                <Button title="Close Options" stype={{marginTop: 20, fontSize: 50} }onPress={() => this.toggleModal()} />
+                <Button title="Close Options" onPress={() => this.toggleModal()} />
             </View>
           </Modal>
 
