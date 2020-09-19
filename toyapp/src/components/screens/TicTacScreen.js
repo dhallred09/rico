@@ -48,7 +48,7 @@ export default class TicTacScreen extends React.Component {
     changeBoardSize = (size) => {
       this.setState({boardSize:size});
       this.resetGame(size);
-      console.log("change board: "+size+" board:"+this.gameState);
+      // console.log("change board: "+size+" board:"+this.gameState);
     }
     
     // Turn Options screen (a Modal) on (visible) or off (invisible).
@@ -165,6 +165,8 @@ export default class TicTacScreen extends React.Component {
     } 
 
     AImove = () => {
+      // Don't start AI while still in Option Menu
+      if (this.optionVisible) return null;
       // Check for AI player
       if (this.draw()) return null; // if board is full, no need for AI
       if (this.state.currentPlayer == 'x' && this.state.xAIlevel != 0 ||
@@ -218,8 +220,6 @@ export default class TicTacScreen extends React.Component {
               </View>
             </TouchableWithoutFeedback>
 
-          < this.AImove />
-          
           {/* Render Options screen as a Modal object */}
           <Modal 
                 animationType = {"slide"}
@@ -273,6 +273,10 @@ export default class TicTacScreen extends React.Component {
           <TouchableOpacity onPress = {() => {this.toggleModal()}} >
             <Text style={styles.optionText}>Options</Text>
           </TouchableOpacity>
+
+          {/* Give AI a turn */}
+          < this.AImove />
+        
         </View>
       // </HotKeys>
         
