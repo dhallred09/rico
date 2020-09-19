@@ -32,37 +32,18 @@ function HomeScreen({ navigation }) {
     <View style={styles.sectionContainer}>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          {/* <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}              */}
+        <ScrollView contentInsetAdjustmentBehavior="automatic"
+                    style={styles.scrollView}>
           <View style={styles.sectionContainer}>
-            <Button 
-              onPress={() => navigation.navigate('TicTacToe')}
-              title="Play Tic-Tac-Toe"
-              color="#841584"
-              backgroundColor = '#34eb74'
-              >
-            </Button>
-            <Button
-              onPress={() => navigation.navigate('TennisBallDemo')}
-              title="Tennis Ball Demo"
-              color="#841584"
-              backgroundColor = '#34eb74'
-              >
-            </Button>
-            <Button 
-              onPress={() => navigation.navigate('SpinnerDemo')}
-              title="Spinner Demo"
-              color="#841584"
-              bdackgroundColor='#34eb74'
-              >
-            </Button>
+            { menu.slice(1,menu.length).map((item,i) => {
+                return (<Button key={i}
+                  onPress={() => navigation.navigate(item.screen)}
+                  title={item.title}
+                  color="#841584"
+                  backgroundColor = '#34eb74'
+                  >
+                </Button>)
+            })}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -70,20 +51,26 @@ function HomeScreen({ navigation }) {
   );
 }
 
+// list of menu items with the screen name, title, and component.
+// Note: this should be declared AFTER all components are known, including HomeScreen.
+const menu = [];
+menu.push({screen: 'Home', title: 'Welcome', comp: HomeScreen});
+menu.push({screen: 'TicTacToe', title: 'Play Tic-Tac-Toe', comp: TicTacScreen});
+menu.push({screen: 'TennisBallDemo', title: 'Tennis Ball Demo', comp: TennisBall});
+menu.push({screen: 'SpinnerDemo', title: 'Spinner Demo', comp: Spinner});
+
 export default class App extends React.Component {
   
   render() {  
     return (
       <NavigationContainer>
         <myStack.Navigator initialRouteName="Home">
-          <myStack.Screen 
-            name="Home"
-            component={HomeScreen}
-            options={{ title: 'Welcome'}}
-          />
-          <myStack.Screen name="TicTacToe" component={TicTacScreen} /> 
-          <myStack.Screen name="TennisBallDemo" component={TennisBall} />
-          <myStack.Screen name="SpinnerDemo" component={Spinner} />
+          {menu.map((item,i) => {
+            const title=item.title;
+            return(
+              <myStack.Screen key={i} name={item.screen} component={item.comp} options={{title}}/>
+            )
+          })}
         </myStack.Navigator>
       </NavigationContainer>
     );
