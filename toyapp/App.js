@@ -22,6 +22,7 @@ import { Colors, } from 'react-native/Libraries/NewAppScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import TicTacScreen from './src/components/screens/TicTacScreen';
+import Connect4 from './src/components/screens/Connect4';
 import TennisBall from './src/components/screens/TennisBall';
 import Spinner from './src/components/screens/Spinner';
 
@@ -56,6 +57,7 @@ function HomeScreen({ navigation }) {
 const menu = [];
 menu.push({screen: 'Home', title: 'Welcome', comp: HomeScreen});
 menu.push({screen: 'TicTacToe', title: 'Play Tic-Tac-Toe', comp: TicTacScreen});
+menu.push({screen: 'ConnectFour', title: 'Play Connect Four', comp: Connect4});
 menu.push({screen: 'TennisBallDemo', title: 'Tennis Ball Demo', comp: TennisBall});
 menu.push({screen: 'SpinnerDemo', title: 'Spinner Demo', comp: Spinner});
 
