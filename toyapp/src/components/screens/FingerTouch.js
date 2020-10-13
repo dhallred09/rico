@@ -1,10 +1,12 @@
+// From https://www.npmjs.com/package/react-native-game-engine
+
 import React, { PureComponent } from "react";
 import { StyleSheet, StatusBar, Text } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import { Finger } from "../common/renderers3D";
 import { MoveFinger } from "../../services/systems3D"
  
-export default class GameEngine1 extends PureComponent {
+export default class FingerTouch extends PureComponent {
   constructor() {
     super();
   }

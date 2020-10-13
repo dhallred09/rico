@@ -23,7 +23,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import TicTacScreen from './src/components/screens/TicTacScreen';
 import Connect4 from './src/components/screens/Connect4';
-import GameEngine1 from './src/components/screens/GameEngine1';
+import FingerTouch from './src/components/screens/FingerTouch';
+// import Transformations3D from './src/components/screens/Transformation3D';
+// import Transformations3DSVG from './src/components/screens/Transformation3DSVG';
+// import Kong from './src/components/screens/KongGame'
 import TennisBall from './src/components/screens/TennisBall';
 import Spinner from './src/components/screens/Spinner';
 
@@ -59,7 +62,10 @@ const menu = [];
 menu.push({screen: 'Home', title: 'Welcome', comp: HomeScreen});
 menu.push({screen: 'TicTacToe', title: 'Play Tic-Tac-Toe', comp: TicTacScreen});
 menu.push({screen: 'ConnectFour', title: 'Play Connect Four', comp: Connect4});
-menu.push({screen: 'MoveFingers', title: 'Move Fingers Demo', comp: GameEngine1});
+menu.push({screen: 'MoveFingers', title: 'Move Fingers Demo', comp: FingerTouch});
+// menu.push({screen: 'Transformations', title: '3D Transform Demo', comp: Transformations3D});
+// menu.push({screen: 'TransformationsSVG', title: '3D SVG Transform Demo', comp: Transformations3DSVG});
+// menu.push({screen: 'KongDemo', title: 'Tennis Ball Demo', comp: Kong});
 menu.push({screen: 'TennisBallDemo', title: 'Tennis Ball Demo', comp: TennisBall});
 menu.push({screen: 'SpinnerDemo', title: 'Spinner Demo', comp: Spinner});
 
